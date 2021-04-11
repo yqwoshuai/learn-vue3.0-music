@@ -24,10 +24,12 @@ export default {
   setup(props, { emit }) {
     // 封装滚动逻辑
     const rootRef = ref(null)
-    useScroll(rootRef, props, emit)
+    // 将scroll实例抛出，给其他组件调用
+    const scroll = useScroll(rootRef, props, emit)
 
     return {
-      rootRef
+      rootRef,
+      scroll
     }
   }
 }
