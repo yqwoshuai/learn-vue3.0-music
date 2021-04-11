@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend" v-loading:[loadingText]="loading">
+  <div class="recommend" v-loading="loading">
     <scroll class="recommend-content">
       <div>
         <div class="slider-wrapper">
@@ -45,9 +45,7 @@ export default {
       // 轮播图数据
       sliders: [],
       // 热门歌单推荐
-      albums: [],
-      // 加载文字
-      loadingText: '正在载入...'
+      albums: []
     }
   },
   computed: {
