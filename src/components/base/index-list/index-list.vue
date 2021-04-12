@@ -4,7 +4,12 @@
       <li v-for="group in data" :key="group.title" class="group">
         <h2 class="title">{{ group.title }}</h2>
         <ul>
-          <li v-for="item in group.list" :key="item.id" class="item">
+          <li
+            v-for="item in group.list"
+            :key="item.id"
+            class="item"
+            @click="onItemClick(item)"
+          >
             <img v-lazy="item.pic" class="avatar" alt="" />
             <span class="name">{{ item.name }}</span>
           </li>
@@ -43,6 +48,7 @@ export default {
   components: {
     Scroll
   },
+  emits: ['select'],
   props: {
     data: {
       type: Array,
@@ -51,7 +57,7 @@ export default {
       }
     }
   },
-  setup(props) {
+  setup(props, { emit }) {
     // 封装 歌手列表 title 逻辑
     const {
       groupRef,
@@ -69,14 +75,21 @@ export default {
       onShortcutTouchMove
     } = useShortcut(props, groupRef)
 
+    // 触发点击事件，派发外部监听的select事件，传入歌手信息
+    function onItemClick(item) {
+      emit('select', item)
+    }
+
     return {
+      onItemClick,
+
       // useFixed
       groupRef,
       onScroll,
       fixedTitle,
       fixedStyle,
       currentIndex,
-      
+
       // useShortcut
       shortcutList,
       scrollRef,

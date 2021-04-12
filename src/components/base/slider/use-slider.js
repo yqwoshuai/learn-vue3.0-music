@@ -21,7 +21,6 @@ export default function useSlider(wrapperRef) {
       slide: true // 启用slide插件
     }))
 
-    console.log(slider)
     // 监听slideWillChange事件，改变轮播底部的active按钮
     sliderVal.on('slideWillChange', page => {
       currentPageIndex.value = page.pageX
@@ -30,7 +29,6 @@ export default function useSlider(wrapperRef) {
 
   // 组件卸载时销毁轮播实例
   onUnmounted(() => {
-    console.log(slider)
     slider.value.destroy()
   })
 
