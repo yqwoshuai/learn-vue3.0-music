@@ -1,20 +1,26 @@
 <template>
   <div class="singer" v-loading="!singers.length">
     <index-list :data="singers" @select="selectSinger"></index-list>
-    <router-view :singer="selectedSinger"></router-view>
+    <router-view v-slot="{ Component }">
+      <transition appear name="slide">
+        <component :is="Component" :singer="selectedSinger" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <script>
 import { getSingerList } from '@/service/singer'
 import IndexList from '@/components/base/index-list/index-list'
+import storage from 'good-storage'
+import { SINGER_KEY } from '@/assets/js/constant'
 
 export default {
   name: 'singer',
   components: {
     IndexList
   },
-  data() {
+  data() { 
     return {
       singers: [],
       // 当前选择的歌手详情
@@ -30,9 +36,14 @@ export default {
     // 跳转歌手详情页，是歌手列表页的子路由
     selectSinger(singer) {
       this.selectedSinger = singer
+      // 保存结果到会话缓存中，让二级页面刷新时能直接读取会话缓存中的数据
+      this.cacheSinger(singer)
       this.$router.push({
         path: `/singer/${singer.mid}`
       })
+    },
+    cacheSinger(singer) {
+      storage.session.set(SINGER_KEY, singer)
     }
   }
 }
