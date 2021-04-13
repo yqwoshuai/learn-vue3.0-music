@@ -7,7 +7,6 @@ import loadingDirective from './components/base/loading/directive'
 import noResultDirective from './components/base/no-result/directive'
 
 import '@/assets/scss/index.scss'
-
 // 使用插件
 function usePlugin() {
   return createApp(App)

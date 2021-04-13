@@ -5,6 +5,12 @@
     </div>
     <h1 class="title">{{ title }}</h1>
     <div class="bg-image" :style="bgImageStyle" ref="bgImgRef">
+      <div class="play-btn-wrapper" :style="playBtnStyle">
+        <div v-show="songs.length > 0" class="play-btn" @click="random">
+          <i class="icon-play"></i>
+          <span class="text">随机播放全部</span>
+        </div>
+      </div>
       <div class="filter" :style="filterStyle"></div>
     </div>
     <scroll
@@ -16,7 +22,7 @@
       @scroll="onScroll"
     >
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list :songs="songs" @select="selectItem"></song-list>
       </div>
     </scroll>
   </div>
@@ -25,6 +31,7 @@
 <script>
 import Scroll from '@/components/base/scroll/scroll'
 import SongList from '@/components/base/song-list/song-list'
+import { mapActions } from 'vuex'
 import useStyle from './use-style'
 
 export default {
@@ -49,9 +56,19 @@ export default {
     }
   },
   methods: {
+    // 返回
     goBack() {
       this.$router.back()
-    }
+    },
+    // 顺序播放
+    selectItem({ song, index }) {
+      this.selectPlay({ list: this.songs, index })
+    },
+    // 随机播放
+    random() {
+      this.randomPlay(this.songs)
+    },
+    ...mapActions(['selectPlay', 'randomPlay'])
   },
   computed: {
     // 没有歌曲时显示无结果组件
@@ -66,7 +83,8 @@ export default {
       onScroll,
       filterStyle,
       scrollStyle,
-      bgImageStyle
+      bgImageStyle,
+      playBtnStyle
     } = useStyle(props)
 
     return {
@@ -74,7 +92,8 @@ export default {
       onScroll,
       filterStyle,
       scrollStyle,
-      bgImageStyle
+      bgImageStyle,
+      playBtnStyle
     }
   }
 }

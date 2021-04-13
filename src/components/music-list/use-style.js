@@ -24,8 +24,10 @@ export default function useStyle(props) {
     // 向上滚动时触发模糊
     if (scrollYVal >= 0) {
       blur =
-        Math.min(maxTranslateY.value / imageHeightVal, scrollYVal / imageHeightVal) *
-        10
+        Math.min(
+          maxTranslateY.value / imageHeightVal,
+          scrollYVal / imageHeightVal
+        ) * 10
     }
     return {
       backdropFilter: `blur(${blur}px)`
@@ -66,6 +68,18 @@ export default function useStyle(props) {
       top: `${imageHeight.value}px`
     }
   })
+  // 计算随机播放按钮样式
+  const playBtnStyle = computed(() => {
+    let display = ''
+    if (scrollY.value >= maxTranslateY.value) {
+      display = 'none'
+    } else {
+      display = 'block'
+    }
+    return {
+      display
+    }
+  })
 
   // 滚动事件获取滚动距离
   function onScroll(pos) {
@@ -77,6 +91,7 @@ export default function useStyle(props) {
     onScroll,
     filterStyle,
     scrollStyle,
-    bgImageStyle
+    bgImageStyle,
+    playBtnStyle
   }
 }
