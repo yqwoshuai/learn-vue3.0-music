@@ -6,7 +6,7 @@ export default function useFixed(props) {
   const listHeight = ref([]) // 每个子列表的高度
   const scrollY = ref(0) // 当前滚动高度
   const currentIndex = ref(0) // 当前子列表索引
-  const distance = ref(0) //
+  const distance = ref(0) // 下一个子列表距离与当前滚动高度的差，用于计算标题向上的偏移量
 
   // 计算当前固定顶部的标题
   const fixedTitle = computed(() => {
