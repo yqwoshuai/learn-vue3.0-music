@@ -6,6 +6,7 @@ import * as actions from './actions'
 
 const debug = process.env.NODE_ENV !== 'production'
 
+// 创建vuex实例
 export default createStore({
   state,
   getters,
