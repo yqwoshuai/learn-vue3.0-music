@@ -26,7 +26,10 @@
             <i @click="next" class="icon-next"></i>
           </div>
           <div class="icon i-right">
-            <i class="icon-not-favorite"></i>
+            <i
+              @click="toggleFavorite(currentSong)"
+              :class="getFavoriteIcon(currentSong)"
+            ></i>
           </div>
         </div>
       </div>
@@ -44,6 +47,7 @@
 import { computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
+import useFavorite from './use-favorite'
 
 export default {
   name: 'player',
@@ -180,6 +184,8 @@ export default {
     // 封装切换播放模式逻辑
     const { modeIcon, changeMode } = useMode()
 
+    // 封装收藏逻辑
+    const { getFavoriteIcon, toggleFavorite } = useFavorite()
     return {
       error,
       disableCls,
@@ -195,7 +201,10 @@ export default {
       currentSong,
       // useMode
       modeIcon,
-      changeMode
+      changeMode,
+      // useFavorite
+      getFavoriteIcon,
+      toggleFavorite
     }
   }
 }
