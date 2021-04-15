@@ -14,7 +14,7 @@
       <div class="bottom">
         <div class="operators">
           <div class="icon i-left">
-            <i class="icon-sequence"></i>
+            <i :class="modeIcon" @click="changeMode"></i>
           </div>
           <div class="icon i-left" :class="disableCls">
             <i @click="prev" class="icon-prev"></i>
@@ -43,6 +43,7 @@
 <script>
 import { computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
+import useMode from './use-mode'
 
 export default {
   name: 'player',
@@ -176,6 +177,9 @@ export default {
       songReady.value = true
     }
 
+    // 封装切换播放模式逻辑
+    const { modeIcon, changeMode } = useMode()
+
     return {
       error,
       disableCls,
@@ -188,7 +192,10 @@ export default {
       goBack,
       audioRef,
       fullScreen,
-      currentSong
+      currentSong,
+      // useMode
+      modeIcon,
+      changeMode
     }
   }
 }
