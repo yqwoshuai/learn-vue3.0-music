@@ -11,6 +11,21 @@
         <h1 class="title">{{ currentSong.name }}</h1>
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
+      <div class="middle">
+        <div class="middle-l">
+          <div class="cd-wrapper">
+            <div class="cd" ref="cdRef">
+              <img
+                ref="cdImageRef"
+                class="image"
+                :class="cdCls"
+                :src="currentSong.pic"
+                alt=""
+              />
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="bottom">
         <div class="progress-wrapper">
           <span class="time time-l">{{ formatTime(currentTime) }}</span>
@@ -62,6 +77,7 @@
 import { computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
+import useCD from './use-cd'
 import useFavorite from './use-favorite'
 import ProgressBar from './progress-bar'
 import { formatTime } from '@/assets/js/util'
@@ -257,6 +273,9 @@ export default {
 
     // 封装收藏逻辑
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
+
+    // 封装旋转图片逻辑
+    const { cdCls, cdRef, cdImageRef } = useCD()
     return {
       end,
       onProgressChanging,
@@ -282,7 +301,11 @@ export default {
       changeMode,
       // useFavorite
       getFavoriteIcon,
-      toggleFavorite
+      toggleFavorite,
+      // useCD
+      cdCls,
+      cdRef,
+      cdImageRef
     }
   }
 }
