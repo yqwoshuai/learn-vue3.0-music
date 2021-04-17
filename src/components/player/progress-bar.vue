@@ -17,7 +17,9 @@
 
 <script>
 import { computed, watch, ref, toRef, onMounted } from 'vue'
+// 进度条按钮默认宽度
 const progressBtnWidth = 16
+// 拖动进度条按钮相关信息
 const touch = {}
 export default {
   name: 'progress-bar',
