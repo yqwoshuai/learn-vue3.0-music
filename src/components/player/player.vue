@@ -12,6 +12,19 @@
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
       <div class="bottom">
+        <div class="progress-wrapper">
+          <span class="time time-l">{{ formatTime(currentTime) }}</span>
+          <div class="progress-bar-wrapper">
+            <progress-bar
+              :progress="progress"
+              @progress-changing="onProgressChanging"
+              @progress-changed="onProgressChanged"
+            ></progress-bar>
+          </div>
+          <span class="time time-r">{{
+            formatTime(currentSong.duration)
+          }}</span>
+        </div>
         <div class="operators">
           <div class="icon i-left">
             <i :class="modeIcon" @click="changeMode"></i>
@@ -39,6 +52,8 @@
       @pause="pause"
       @canplay="ready"
       @error="error"
+      @timeupdate="updateTime"
+      @ended="end"
     ></audio>
   </div>
 </template>
@@ -48,9 +63,18 @@ import { computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
+import ProgressBar from './progress-bar'
+import { formatTime } from '@/assets/js/util'
+import { PLAY_MODE } from '@/assets/js/constant'
+
+// 当前进度条是否正在拖动
+let progressChanging = false
 
 export default {
   name: 'player',
+  components: {
+    ProgressBar
+  },
   setup() {
     // 获取vuex中保存的数据
     const store = useStore()
@@ -58,6 +82,8 @@ export default {
     const audioRef = ref(null)
     // 歌曲加载部分加载是否完成
     const songReady = ref(false)
+    // 当前播放事件
+    const currentTime = ref(0)
     // 全屏模式
     const fullScreen = computed(() => store.state.fullScreen)
     // 当前播放歌曲
@@ -72,6 +98,14 @@ export default {
     const playIcon = computed(() => {
       return playing.value ? 'icon-pause' : 'icon-play'
     })
+    // 当前播放模式
+    const playMode = computed(() => store.state.playMode)
+    // 当前播放进度
+    const progress = computed(() => {
+      return currentTime.value === 0
+        ? 0
+        : currentTime.value / currentSong.value.duration
+    })
     // 按钮禁用class
     const disableCls = computed(() => {
       return songReady.value ? '' : 'disable'
@@ -82,6 +116,9 @@ export default {
       if (!newSong.id || !newSong.url) {
         return
       }
+
+      currentTime.value = 0
+
       // 歌曲加载状态置为未完成 false
       songReady.value = false
       const audioEl = audioRef.value
@@ -168,6 +205,7 @@ export default {
       const audioEl = audioRef.value
       audioEl.currentTime = 0
       audioEl.play()
+      store.commit('setPlayingState', true)
     }
     // 歌曲加载完成允许播放触发事件
     function ready() {
@@ -180,6 +218,39 @@ export default {
     function error() {
       songReady.value = true
     }
+    // 播放进度事件触发
+    function updateTime(e) {
+      // 正在拖动进度条则不修改当前播放时间
+      if (!progressChanging) {
+        currentTime.value = e.target.currentTime
+      }
+    }
+    // 播放结束时根据播放模式切换歌曲
+    function end() {
+      // 当前播放时间置0
+      currentTime.value = 0
+      if (playMode.value === PLAY_MODE.loop) {
+        loop()
+      } else {
+        next()
+      }
+    }
+    // 拖动歌曲进度条按钮触发事件
+    function onProgressChanging(progress) {
+      progressChanging = true
+      currentTime.value = currentSong.value.duration * progress
+    }
+    // 进度条按钮拖动结束触发事件
+    function onProgressChanged(progress) {
+      progressChanging = false
+      // 设置audio的当前播放时间
+      audioRef.value.currentTime = currentTime.value =
+        currentSong.value.duration * progress
+      // 暂停状态下切换进度直接播放
+      if (!playing.value) {
+        store.commit('setPlayingState', true)
+      }
+    }
 
     // 封装切换播放模式逻辑
     const { modeIcon, changeMode } = useMode()
@@ -187,6 +258,10 @@ export default {
     // 封装收藏逻辑
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
     return {
+      end,
+      onProgressChanging,
+      onProgressChanged,
+      updateTime,
       error,
       disableCls,
       ready,
@@ -199,6 +274,9 @@ export default {
       audioRef,
       fullScreen,
       currentSong,
+      progress,
+      currentTime,
+      formatTime,
       // useMode
       modeIcon,
       changeMode,
