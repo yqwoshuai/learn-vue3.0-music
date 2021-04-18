@@ -24,7 +24,27 @@
               />
             </div>
           </div>
+          <div class="playing-lyric-wrapper">
+            <div class="playing-lyric">{{ playingLyric }}</div>
+          </div>
         </div>
+        <scroll class="middle-r" ref="lyricScrollRef">
+          <div class="lyric-wrapper">
+            <div v-if="currentLyric" ref="lyricListRef">
+              <p
+                class="text"
+                :class="{ current: currentLineNum === index }"
+                v-for="(line, index) in currentLyric.lines"
+                :key="line.num"
+              >
+                {{ line.txt }}
+              </p>
+            </div>
+            <div class="pure-music" v-show="pureMusicLyric">
+              <p>{{ pureMusicLyric }}</p>
+            </div>
+          </div>
+        </scroll>
       </div>
       <div class="bottom">
         <div class="progress-wrapper">
@@ -79,9 +99,11 @@ import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useCD from './use-cd'
 import useFavorite from './use-favorite'
+import useLyric from './use-lyric'
 import ProgressBar from './progress-bar'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
+import Scroll from '@/components/base/scroll/scroll'
 
 // 当前进度条是否正在拖动
 let progressChanging = false
@@ -89,7 +111,8 @@ let progressChanging = false
 export default {
   name: 'player',
   components: {
-    ProgressBar
+    ProgressBar,
+    Scroll
   },
   setup() {
     // 获取vuex中保存的数据
@@ -100,6 +123,7 @@ export default {
     const songReady = ref(false)
     // 当前播放事件
     const currentTime = ref(0)
+
     // 全屏模式
     const fullScreen = computed(() => store.state.fullScreen)
     // 当前播放歌曲
@@ -126,6 +150,31 @@ export default {
     const disableCls = computed(() => {
       return songReady.value ? '' : 'disable'
     })
+
+    // 封装切换播放模式逻辑
+    const { modeIcon, changeMode } = useMode()
+
+    // 封装收藏逻辑
+    const { getFavoriteIcon, toggleFavorite } = useFavorite()
+
+    // 封装旋转图片逻辑
+    const { cdCls, cdRef, cdImageRef } = useCD()
+
+    // 封装歌词逻辑
+    const {
+      currentLyric,
+      currentLineNum,
+      pureMusicLyric,
+      playingLyric,
+      playLyric,
+      stopLyric,
+      lyricScrollRef,
+      lyricListRef
+    } = useLyric({
+      songReady,
+      currentTime
+    })
+
     // 监听当前播放歌曲
     watch(currentSong, newSong => {
       // 歌曲不存在或无法播放返回
@@ -152,9 +201,16 @@ export default {
         return
       }
       const audioEl = audioRef.value
-      // 切换播放暂停
-      newPlaying ? audioEl.play() : audioEl.pause()
+      // 切换播放暂停，歌词滚动跟随播放状态
+      if (newPlaying) {
+        audioEl.play()
+        playLyric()
+      } else {
+        audioEl.pause()
+        stopLyric()
+      }
     })
+
     // 收起全屏
     function goBack() {
       store.commit('setFullScreen', false)
@@ -229,6 +285,7 @@ export default {
         return
       }
       songReady.value = true
+      playLyric()
     }
     // 歌曲加载错误触发事件，将加载状态置为结束
     function error() {
@@ -255,6 +312,10 @@ export default {
     function onProgressChanging(progress) {
       progressChanging = true
       currentTime.value = currentSong.value.duration * progress
+      // 拖动时歌词要滚动到对应位置，但是不能自动滚动
+      // 所以先用playLyric将歌词定位到对应位置，再用stopLyric暂停歌词
+      playLyric()
+      stopLyric()
     }
     // 进度条按钮拖动结束触发事件
     function onProgressChanged(progress) {
@@ -266,16 +327,10 @@ export default {
       if (!playing.value) {
         store.commit('setPlayingState', true)
       }
+      // 拖动结束时滚动歌词
+      playLyric()
     }
 
-    // 封装切换播放模式逻辑
-    const { modeIcon, changeMode } = useMode()
-
-    // 封装收藏逻辑
-    const { getFavoriteIcon, toggleFavorite } = useFavorite()
-
-    // 封装旋转图片逻辑
-    const { cdCls, cdRef, cdImageRef } = useCD()
     return {
       end,
       onProgressChanging,
@@ -305,7 +360,14 @@ export default {
       // useCD
       cdCls,
       cdRef,
-      cdImageRef
+      cdImageRef,
+      // useLyric
+      currentLyric,
+      currentLineNum,
+      pureMusicLyric,
+      playingLyric,
+      lyricScrollRef,
+      lyricListRef
     }
   }
 }
