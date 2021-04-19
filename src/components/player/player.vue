@@ -170,7 +170,7 @@ export default {
     // 封装旋转图片逻辑
     const { cdCls, cdRef, cdImageRef } = useCD()
 
-    //
+    // 封装cd歌词切换逻辑
     const {
       currentShow,
       middleLStyle,
