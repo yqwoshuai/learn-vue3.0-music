@@ -1,5 +1,5 @@
 <template>
-  <div class="player">
+  <div class="player" v-show="playList.length">
     <div class="normal-player" v-show="fullScreen">
       <div class="background">
         <img :src="currentSong.pic" alt="" />
@@ -60,6 +60,7 @@
           <span class="time time-l">{{ formatTime(currentTime) }}</span>
           <div class="progress-bar-wrapper">
             <progress-bar
+              ref="barRef"
               :progress="progress"
               @progress-changing="onProgressChanging"
               @progress-changed="onProgressChanged"
@@ -91,6 +92,7 @@
         </div>
       </div>
     </div>
+    <mini-player :progress="progress" :toggle-play="togglePlay"></mini-player>
     <audio
       ref="audioRef"
       @pause="pause"
@@ -103,16 +105,17 @@
 </template>
 
 <script>
-import { computed, watch, ref } from 'vue'
+import { computed, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useCD from './use-cd'
 import useFavorite from './use-favorite'
 import useLyric from './use-lyric'
 import useMiddleInteractive from './use-middle-interactive'
-import ProgressBar from './progress-bar'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
+import ProgressBar from './progress-bar'
+import MiniPlayer from './mini-player'
 import Scroll from '@/components/base/scroll/scroll'
 
 // 当前进度条是否正在拖动
@@ -122,6 +125,7 @@ export default {
   name: 'player',
   components: {
     ProgressBar,
+    MiniPlayer,
     Scroll
   },
   setup() {
@@ -129,6 +133,8 @@ export default {
     const store = useStore()
     // 播放器dom
     const audioRef = ref(null)
+    // 进度条dom
+    const barRef = ref(null)
     // 歌曲加载部分加载是否完成
     const songReady = ref(false)
     // 当前播放事件
@@ -228,6 +234,15 @@ export default {
       } else {
         audioEl.pause()
         stopLyric()
+      }
+    })
+    // 监听全屏播放器展示状态
+    watch(fullScreen, async newFullScreen => {
+      // 开启全屏播放时，更新进度条播放进度
+      if (newFullScreen) {
+        // dom更新后再更新播放进度
+        await nextTick()
+        barRef.value.setOffset(progress.value)
       }
     })
 
@@ -352,6 +367,7 @@ export default {
     }
 
     return {
+      playList,
       end,
       onProgressChanging,
       onProgressChanged,
@@ -366,6 +382,7 @@ export default {
       togglePlay,
       goBack,
       audioRef,
+      barRef,
       fullScreen,
       currentSong,
       progress,

@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { computed, watch, ref, toRef, onMounted } from 'vue'
+import { computed, watch, ref, toRef } from 'vue'
 // 进度条按钮默认宽度
 const progressBtnWidth = 16
 // 拖动进度条按钮相关信息
@@ -43,14 +43,10 @@ export default {
     const outerProgressWidth = computed(() => {
       return outerProgressRef.value.clientWidth || 0
     })
-    // dom加载完成获取宽度
-    onMounted(() => {
-      outerProgressWidth.value = outerProgressRef.value.clientWidth
-    })
     // 监听播放进度变化
     watch(progress, newProgress => {
-      const barWidth = outerProgressWidth.value - progressBtnWidth
-      offset.value = barWidth * newProgress
+      // 更新内层进度条位置
+      setOffset(newProgress)
     })
     // 内层进度条宽度
     const progressStyle = computed(() => {
@@ -92,7 +88,12 @@ export default {
       // 派发事件，告诉外部新的播放进度
       emit('progress-changed', progress)
     }
-
+    // 更新内层进度条位置
+    function setOffset(progress) {
+      const barWidth = outerProgressWidth.value - progressBtnWidth
+      offset.value = barWidth * progress
+    }
+    
     return {
       outerProgressRef,
       innerProgressRef,
@@ -101,7 +102,8 @@ export default {
       onTouchEnd,
       onClick,
       progressStyle,
-      btnStyle
+      btnStyle,
+      setOffset
     }
   }
 }
