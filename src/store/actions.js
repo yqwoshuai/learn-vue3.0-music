@@ -39,3 +39,32 @@ export function changeMode({ commit, state, getters }, mode) {
   commit('setCurrentIndex', index)
   commit('setPlayMode', mode)
 }
+
+// 执行删除歌曲
+export function removeSong({ commit, state }, song) {
+  // 获取播放列表副本
+  const sequenceList = state.sequenceList.slice()
+  const playList = state.playList.slice()
+  // 找到当前歌曲索引
+  const sequenceIndex = findIndex(sequenceList, song)
+  const playIndex = findIndex(playList, song)
+  // 删除当前歌曲
+  sequenceList.splice(sequenceIndex, 1)
+  playList.splice(playIndex, 1)
+  // 修改当前currentIndex
+  let currentIndex = state.currentIndex
+  // 删除当前播放歌曲之前的歌曲，或者当前播放歌曲是最后一首时，需要currentIndex - 1
+  if (playIndex < currentIndex || currentIndex === playList.length) {
+    currentIndex--
+  }
+  commit('setCurrentIndex', currentIndex)
+  commit('setSequenceList', sequenceList)
+  commit('setPlayList', playList)
+}
+
+// 找到song在列表中的索引
+function findIndex(list, song) {
+  return list.findIndex(item => {
+    return item.id === song.id
+  })
+}

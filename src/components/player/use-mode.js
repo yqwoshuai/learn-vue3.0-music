@@ -16,6 +16,15 @@ export default function useMode() {
       ? 'icon-random'
       : 'icon-loop'
   })
+  // 播放模式文案
+  const modeText = computed(() => {
+    const playModeVal = playMode.value
+    return playModeVal === PLAY_MODE.sequence
+      ? '顺序播放'
+      : playModeVal === PLAY_MODE.random
+      ? '随机播放'
+      : '单曲循环'
+  })
 
   // 修改播放模式
   function changeMode() {
@@ -26,6 +35,7 @@ export default function useMode() {
 
   return {
     modeIcon,
-    changeMode
+    changeMode,
+    modeText
   }
 }
