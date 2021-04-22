@@ -1,9 +1,11 @@
 import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 
 // 滚动到顶部时，顶部的图片覆盖距离，即图片的最小显示高度
 const RESERVED_HEIGHT = 40
 
 export default function useStyle(props) {
+  const store = useStore()
   const bgImgRef = ref(null)
   // 最多可以向上移动的临界距离，超过这个距离会改变图片的层级，让图片覆盖住列表
   const maxTranslateY = ref(0)
@@ -11,6 +13,9 @@ export default function useStyle(props) {
   const scrollY = ref(0)
   // 图片dom的高度，mounted时才能获取到具体值
   const imageHeight = ref(0)
+
+  const playList = computed(() => store.state.playList)
+
   onMounted(() => {
     // 可以读取到dom内容时赋值
     imageHeight.value = bgImgRef.value.clientHeight
@@ -64,8 +69,11 @@ export default function useStyle(props) {
   })
   // 计算初始歌曲列表顶部偏移量，会等于图片的高度
   const scrollStyle = computed(() => {
+    // 底部mini播放器存在时需要让容器保留底部60px
+    const bottom = playList.value.length ? '60px' : '0'
     return {
-      top: `${imageHeight.value}px`
+      top: `${imageHeight.value}px`,
+      bottom
     }
   })
   // 计算随机播放按钮样式

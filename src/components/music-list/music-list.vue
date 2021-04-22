@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import Scroll from '@/components/base/scroll/scroll'
+import Scroll from '@/components/wrap-scroll'
 import SongList from '@/components/base/song-list/song-list'
 import { mapActions } from 'vuex'
 import useStyle from './use-style'
