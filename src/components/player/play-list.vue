@@ -123,6 +123,7 @@ export default {
       const index = sequenceList.value.findIndex(song => {
         return currentSong.value.id === song.id
       })
+      // 未找到歌曲直接返回
       if (index === -1) return
       // listRef绑定的是transition-group，要用$el获取dom
       const traget = listRef.value.$el.children[index]
@@ -130,6 +131,7 @@ export default {
     }
     // 派发移除歌曲action
     function removeSong(song) {
+      // 防止重复点击
       if (removing.value) {
         return
       }
@@ -138,15 +140,16 @@ export default {
       if (!playList.value.length) {
         hide()
       }
+      // 删除动画执行300毫秒，300毫秒之后放开锁
       setTimeout(() => {
         removing.value = false
       }, 300)
     }
-
+    // 展示清空confirm
     function showConfirm() {
       confirmRef.value.show()
     }
-
+    // 清空播放列表
     function confirmClear() {
       store.dispatch('clearSongList')
       hide()
