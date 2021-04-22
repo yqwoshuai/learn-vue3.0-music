@@ -8,6 +8,9 @@
             <h1 class="title">
               <i class="icon" :class="modeIcon" @click="changeMode"></i>
               <span class="text">{{ modeText }}</span>
+              <span class="clear" @click="showConfirm">
+                <i class="icon-clear"></i>
+              </span>
             </h1>
           </div>
           <scroll class="list-content" ref="scrollRef">
@@ -23,7 +26,11 @@
                 <span class="favorite" @click.stop="toggleFavorite(song)">
                   <i :class="getFavoriteIcon(song)"></i>
                 </span>
-                <span class="delete" @click.stop="removeSong(song)">
+                <span
+                  class="delete"
+                  :class="{ disable: removing }"
+                  @click.stop="removeSong(song)"
+                >
                   <i class="icon-delete"></i>
                 </span>
               </li>
@@ -33,6 +40,12 @@
             <span>关闭</span>
           </div>
         </div>
+        <confirm
+          ref="confirmRef"
+          @confirm="confirmClear"
+          text="是否清空播放列表？"
+          confirm-btn-text="清空"
+        ></confirm>
       </div>
     </transition>
   </teleport>
@@ -44,16 +57,20 @@ import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
 import Scroll from '@/components/base/scroll/scroll'
+import Confirm from '@/components/base/confirm/confirm.vue'
 export default {
   name: 'play-list',
   components: {
-    Scroll
+    Scroll,
+    Confirm
   },
   setup() {
     const store = useStore()
     const visible = ref(false)
+    const removing = ref(false)
     const scrollRef = ref(null)
     const listRef = ref(null)
+    const confirmRef = ref(null)
     const playList = computed(() => store.state.playList)
     const sequenceList = computed(() => store.state.sequenceList)
     const currentSong = computed(() => store.getters.currentSong)
@@ -62,9 +79,9 @@ export default {
     // 服用收藏逻辑
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
     // 监听当前歌曲变化，将新的播放歌曲滚动到列表顶部
-    watch(currentSong, async () => {
+    watch(currentSong, async newSong => {
       // 组件不展示时不操作
-      if (!visible.value) {
+      if (!visible.value || !newSong.id) {
         return
       }
       // dom准备完毕再滚动
@@ -106,16 +123,40 @@ export default {
       const index = sequenceList.value.findIndex(song => {
         return currentSong.value.id === song.id
       })
+      if (index === -1) return
       // listRef绑定的是transition-group，要用$el获取dom
       const traget = listRef.value.$el.children[index]
       scrollRef.value.scroll.scrollToElement(traget, 300)
     }
     // 派发移除歌曲action
     function removeSong(song) {
+      if (removing.value) {
+        return
+      }
+      removing.value = true
       store.dispatch('removeSong', song)
+      if (!playList.value.length) {
+        hide()
+      }
+      setTimeout(() => {
+        removing.value = false
+      }, 300)
+    }
+
+    function showConfirm() {
+      confirmRef.value.show()
+    }
+
+    function confirmClear() {
+      store.dispatch('clearSongList')
+      hide()
     }
 
     return {
+      showConfirm,
+      confirmClear,
+      confirmRef,
+      removing,
       visible,
       playList,
       sequenceList,

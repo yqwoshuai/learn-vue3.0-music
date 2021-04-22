@@ -40,7 +40,6 @@ export default function useCD() {
           // slider切换结束时触发，改变播放歌曲
           sliderVal.on('slidePageChanged', ({ pageX }) => {
             store.commit('setCurrentIndex', pageX)
-            store.commit('setPlayingState', true)
           })
         } else {
           // bs实例已经存在时刷新slider
@@ -55,6 +54,14 @@ export default function useCD() {
       // 滚动到索引对应的slider
       if (sliderVal && sliderShow.value) {
         sliderVal.goToPage(newIndex, 0, 0)
+      }
+    })
+    // 监听播放列表
+    watch(playList, async newList => {
+      // 播放列表存在，组件展示，且slider已经初始化时刷新slider
+      if (sliderVal && sliderShow.value && newList.length) {
+        await nextTick()
+        sliderVal.refresh()
       }
     })
   })

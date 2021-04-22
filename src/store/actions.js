@@ -48,6 +48,11 @@ export function removeSong({ commit, state }, song) {
   // 找到当前歌曲索引
   const sequenceIndex = findIndex(sequenceList, song)
   const playIndex = findIndex(playList, song)
+
+  if (sequenceIndex < 0 || playIndex < 0) {
+    return
+  }
+
   // 删除当前歌曲
   sequenceList.splice(sequenceIndex, 1)
   playList.splice(playIndex, 1)
@@ -60,6 +65,19 @@ export function removeSong({ commit, state }, song) {
   commit('setCurrentIndex', currentIndex)
   commit('setSequenceList', sequenceList)
   commit('setPlayList', playList)
+  // 列表无歌曲时停止播放
+  if (!playList.length) {
+    commit('setPlayingState', false)
+  }
+}
+
+// 执行清空播放列表
+export function clearSongList({ commit }) {
+  commit('setCurrentIndex', 0)
+  commit('setSequenceList', [])
+  commit('setPlayList', [])
+  // 停止播放歌曲
+  commit('setPlayingState', false)
 }
 
 // 找到song在列表中的索引

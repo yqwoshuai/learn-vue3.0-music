@@ -228,15 +228,16 @@ export default {
       if (!newSong.id || !newSong.url) {
         return
       }
-
+      // 播放事件归零
       currentTime.value = 0
-
       // 歌曲加载状态置为未完成 false
       songReady.value = false
       const audioEl = audioRef.value
       // 播放歌曲
       audioEl.src = newSong.url
       audioEl.play()
+      // 当前歌曲切换时播放歌曲
+      store.commit('setPlayingState', true)
     })
     // 监听播放状态
     watch(playing, newPlaying => {
@@ -298,10 +299,6 @@ export default {
         }
         // 修改当前播放歌曲索引
         store.commit('setCurrentIndex', index)
-        // 在暂停状态切换歌曲则播放歌曲
-        if (!playing.value) {
-          store.commit('setPlayingState', true)
-        }
       }
     }
     // 播放下一首歌曲
@@ -322,10 +319,6 @@ export default {
         }
         // 修改当前播放歌曲索引
         store.commit('setCurrentIndex', index)
-        // 在暂停状态切换歌曲则播放歌曲
-        if (!playing.value) {
-          store.commit('setPlayingState', true)
-        }
       }
     }
     // 循环播放
