@@ -74,6 +74,7 @@ export default {
     this.albums = result.albums
   },
   methods: {
+    // 点击推荐歌单
     selectItem(album) {
       this.selectAlbum = album
       this.cacheAlbum(album)
@@ -81,6 +82,7 @@ export default {
         path: `/recommend/${album.id}`
       })
     },
+    // 缓存歌单信息
     cacheAlbum(album) {
       storage.session.set(ALBUM_KEY, album)
     }

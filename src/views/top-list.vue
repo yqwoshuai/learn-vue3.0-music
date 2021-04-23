@@ -1,12 +1,52 @@
 <template>
-  <div class="top-list">
-    排行榜页面
+  <div class="top-list" v-loading="loading">
+    <scroll class="top-list-content">
+      <ul>
+        <li
+          class="item"
+          v-for="item in topList"
+          :key="item.id"
+          @click="selectItem(item)"
+        >
+          <div class="icon">
+            <img width="100" height="100" v-lazy="item.pic" />
+          </div>
+          <ul class="song-list">
+            <li
+              class="song"
+              v-for="(song, index) in item.songList"
+              :key="song.id"
+            >
+              <span>{{ index + 1 }}. </span>
+              <span>{{ song.songName }}-{{ song.singerName }}</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </scroll>
   </div>
 </template>
 
 <script>
+import Scroll from '@/components/wrap-scroll'
+import { getTopList } from '@/service/top-list'
 export default {
-  name: 'top-list'
+  name: 'top-list',
+  components: {
+    Scroll
+  },
+  data() {
+    return {
+      topList: [],
+      loading: true
+    }
+  },
+  // 获取排行榜数据
+  async created() {
+    const result = await getTopList()
+    this.topList = result.topList
+    this.loading = false
+  }
 }
 </script>
 
@@ -16,7 +56,7 @@ export default {
   width: 100%;
   top: 88px;
   bottom: 0;
-  .topList-content {
+  .top-list-content {
     height: 100%;
     overflow: hidden;
     .item {

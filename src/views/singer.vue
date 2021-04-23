@@ -42,6 +42,7 @@ export default {
         path: `/singer/${singer.mid}`
       })
     },
+    // 缓存歌手信息
     cacheSinger(singer) {
       storage.session.set(SINGER_KEY, singer)
     }
