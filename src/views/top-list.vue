@@ -24,12 +24,20 @@
         </li>
       </ul>
     </scroll>
+    <router-view v-slot="{ Component }">
+      <transition appear name="slide">
+        <component :is="Component" :data="selectedTop" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <script>
 import Scroll from '@/components/wrap-scroll'
 import { getTopList } from '@/service/top-list'
+import storage from 'good-storage'
+import { TOP_KEY } from '@/assets/js/constant'
+
 export default {
   name: 'top-list',
   components: {
@@ -38,7 +46,8 @@ export default {
   data() {
     return {
       topList: [],
-      loading: true
+      loading: true,
+      selectedTop: null
     }
   },
   // 获取排行榜数据
@@ -46,6 +55,20 @@ export default {
     const result = await getTopList()
     this.topList = result.topList
     this.loading = false
+  },
+  methods: {
+    // 点击排行榜单
+    selectItem(top) {
+      this.selectedTop = top
+      this.cacheTop(top)
+      this.$router.push({
+        path: `/top-list/${top.id}`
+      })
+    },
+    // 缓存排行榜单数据
+    cacheTop(top) {
+      storage.session.set(TOP_KEY, top)
+    }
   }
 }
 </script>
