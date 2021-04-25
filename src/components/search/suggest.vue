@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="rootRef"
     class="suggest"
     v-loading:[loadingText]="loading"
     v-no-result:[noResultText]="noResult"
@@ -21,14 +22,16 @@
           <p class="text">{{ song.singer }}-{{ song.name }}</p>
         </div>
       </li>
+      <div class="suggest-item" v-loading:[loadingText]="pullUpLoading"></div>
     </ul>
   </div>
 </template>
 
 <script>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { search } from '@/service/search'
 import { processSongs } from '@/service/songs'
+import usePullUpLoad from './use-pull-up-load'
 
 export default {
   name: 'suggest',
@@ -46,6 +49,9 @@ export default {
     const page = ref(1)
     const loadingText = ref('')
     const noResultText = ref('抱歉，暂无搜索结果')
+
+    const { rootRef, isPullUpLoad, scroll } = usePullUpLoad(searchMore)
+
     // 是否正在加载
     const loading = computed(() => {
       return !singer.value && !songs.value.length
@@ -53,6 +59,10 @@ export default {
     // 加载完成是否有结果数据
     const noResult = computed(() => {
       return !singer.value && !songs.value.length && !hasMore.value
+    })
+    // 是否正在上拉加载
+    const pullUpLoading = computed(() => {
+      return isPullUpLoad.value && hasMore.value
     })
 
     // 监听搜索内容
@@ -68,6 +78,9 @@ export default {
     )
     // 查询搜索
     async function searchFirst() {
+      if (!props.query) {
+        return
+      }
       // 清空前一次数据
       page.value = 1
       songs.value = []
@@ -78,6 +91,28 @@ export default {
       songs.value = await processSongs(result.songs)
       singer.value = result.singer
       hasMore.value = result.hasMore
+      await nextTick()
+      await makeItScrollable()
+    }
+    // 分页查询
+    async function searchMore() {
+      if (!hasMore.value || !props.query) {
+        return
+      }
+      // 页码递增查询数据
+      page.value++
+      const result = await search(props.query, page.value, props.showSinger)
+      songs.value = songs.value.concat(await processSongs(result.songs))
+      hasMore.value = result.hasMore
+      // 单页数据不满一屏时继续加载下一页数据
+      await nextTick()
+      await makeItScrollable()
+    }
+    // 单页数据不满一屏时继续加载下一页数据
+    async function makeItScrollable() {
+      if (scroll.value.maxScrollY >= -1) {
+        await searchMore()
+      }
     }
 
     return {
@@ -86,7 +121,10 @@ export default {
       loadingText,
       noResult,
       loading,
-      noResultText
+      noResultText,
+      // usePullUpLoad
+      rootRef,
+      pullUpLoading
     }
   }
 }
