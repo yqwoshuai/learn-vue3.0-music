@@ -6,7 +6,7 @@
     v-no-result:[noResultText]="noResult"
   >
     <ul class="suggest-list">
-      <li class="suggest-item" v-if="singer">
+      <li class="suggest-item" v-if="singer" @click="selectSinger(singer)">
         <div class="icon">
           <i class="icon-mine"></i>
         </div>
@@ -14,7 +14,12 @@
           <p class="text">{{ singer.name }}</p>
         </div>
       </li>
-      <li class="suggest-item" v-for="song in songs" :key="song.id">
+      <li
+        class="suggest-item"
+        v-for="song in songs"
+        :key="song.id"
+        @click="selectSong(song)"
+      >
         <div class="icon">
           <i class="icon-music"></i>
         </div>
@@ -42,15 +47,15 @@ export default {
       default: true
     }
   },
-  setup(props) {
+  emits: ['select-song', 'select-singer'],
+  setup(props, { emit }) {
     const singer = ref(null)
     const songs = ref([])
     const hasMore = ref(true)
     const page = ref(1)
     const loadingText = ref('')
     const noResultText = ref('抱歉，暂无搜索结果')
-
-    const { rootRef, isPullUpLoad, scroll } = usePullUpLoad(searchMore)
+    const manualLoading = ref(false)
 
     // 是否正在加载
     const loading = computed(() => {
@@ -64,6 +69,15 @@ export default {
     const pullUpLoading = computed(() => {
       return isPullUpLoad.value && hasMore.value
     })
+    // 是否正在手动执行上拉加载或者自动加载
+    const preventPullUpLoad = computed(() => {
+      return loading.value || manualLoading.value
+    })
+
+    const { rootRef, isPullUpLoad, scroll } = usePullUpLoad(
+      searchMore,
+      preventPullUpLoad
+    )
 
     // 监听搜索内容
     watch(
@@ -111,8 +125,19 @@ export default {
     // 单页数据不满一屏时继续加载下一页数据
     async function makeItScrollable() {
       if (scroll.value.maxScrollY >= -1) {
+        // 切换手动加载状态
+        manualLoading.value = true
         await searchMore()
+        manualLoading.value = false
       }
+    }
+    // 派发选择歌曲事件
+    function selectSong(song) {
+      emit('select-song', song)
+    }
+    // 派发选择歌手事件
+    function selectSinger(singer) {
+      emit('select-singer', singer)
     }
 
     return {
@@ -122,6 +147,8 @@ export default {
       noResult,
       loading,
       noResultText,
+      selectSong,
+      selectSinger,
       // usePullUpLoad
       rootRef,
       pullUpLoading

@@ -19,24 +19,43 @@
       </div>
     </div>
     <div class="search-result" v-show="query">
-      <suggest :query="query"></suggest>
+      <suggest
+        :query="query"
+        @select-song="selectSong"
+        @select-singer="selectSinger"
+      ></suggest>
     </div>
+    <router-view v-slot="{ Component }">
+      <transition appear name="slide">
+        <component :is="Component" :data="selectedSinger" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import SearchInput from '@/components/search/search-input'
 import Suggest from '@/components/search/suggest'
 import { getHotKeys } from '@/service/search'
+import storage from 'good-storage'
+import { SINGER_KEY } from '@/assets/js/constant'
+
 export default {
   name: 'search',
   components: { SearchInput, Suggest },
   setup() {
+    const store = useStore()
+    const router = useRouter()
     // 搜索参数
     const query = ref('')
     // 热门搜索
     const hotKeys = ref([])
+    // 歌手信息
+    const selectedSinger = ref(null)
+
     // 获取热门搜索数据
     getHotKeys().then(result => {
       hotKeys.value = result.hotKeys
@@ -47,7 +66,31 @@ export default {
       query.value = s
     }
 
-    return { query, hotKeys, addQuery }
+    // 派发添加歌曲
+    function selectSong(song) {
+      store.dispatch('addSong', song)
+    }
+    // 选择歌手，跳转歌手二级页面
+    function selectSinger(singer) {
+      selectedSinger.value = singer
+      cacheSinger(singer)
+      router.push({
+        path: `/search/${singer.mid}`
+      })
+    }
+    // 缓存歌手信息
+    function cacheSinger(singer) {
+      storage.session.set(SINGER_KEY, singer)
+    }
+
+    return {
+      query,
+      hotKeys,
+      addQuery,
+      selectSong,
+      selectSinger,
+      selectedSinger
+    }
   }
 }
 </script>

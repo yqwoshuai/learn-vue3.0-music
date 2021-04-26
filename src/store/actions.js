@@ -80,6 +80,30 @@ export function clearSongList({ commit }) {
   commit('setPlayingState', false)
 }
 
+// 添加歌曲到播放列表
+export function addSong({ commit, state }, song) {
+  const playList = state.playList.slice()
+  const sequenceList = state.sequenceList.slice()
+  let currentIndex = state.currentIndex
+  // 是否已在播放列表内，在则切换index，不在则添加后再切换index
+  const playIndex = findIndex(playList, song)
+  if (playIndex > -1) {
+    currentIndex = playIndex
+  } else {
+    playList.push(song)
+    currentIndex = playList.length - 1
+  }
+  const sequenceIndex = findIndex(sequenceList, song)
+  if (sequenceIndex === -1) {
+    sequenceList.push(song)
+  }
+  commit('setCurrentIndex', currentIndex)
+  commit('setSequenceList', sequenceList)
+  commit('setPlayList', playList)
+  commit('setPlayingState', false)
+  commit('setFullScreen', true)
+}
+
 // 找到song在列表中的索引
 function findIndex(list, song) {
   return list.findIndex(item => {
