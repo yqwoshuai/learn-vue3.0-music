@@ -36,7 +36,14 @@ export function remove(key, compare) {
   storage.set(key, items)
   return items
 }
+
 // 从localStorage中读取
 export function load(key) {
   return storage.get(key, [])
+}
+
+// 从localStorage中清空
+export function clear(key) {
+  storage.remove(key)
+  return []
 }
