@@ -8,7 +8,7 @@
         @click="selectItem(item)"
       >
         <span class="text">{{ item }}</span>
-        <span class="icon" @click.stop="deleteItem(item)">
+        <span v-if="showDelete" class="icon" @click.stop="deleteItem(item)">
           <i class="icon-delete"></i>
         </span>
       </li>
@@ -20,11 +20,17 @@
 export default {
   name: 'search-list',
   props: {
+    // 搜索数据
     searches: {
       type: Array,
       default() {
         return []
       }
+    },
+    // 是否展示删除按钮
+    showDelete: {
+      type: Boolean,
+      default: true
     }
   },
   emits: ['select', 'delete'],

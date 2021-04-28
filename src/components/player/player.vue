@@ -124,6 +124,7 @@ import useFavorite from './use-favorite'
 import useLyric from './use-lyric'
 import useAnimation from './use-animation'
 import useMiddleInteractive from './use-middle-interactive'
+import usePlayHistory from './use-play-history'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
 import ProgressBar from './progress-bar'
@@ -197,6 +198,9 @@ export default {
       onMiddleTouchMove,
       onMiddleTouchEnd
     } = useMiddleInteractive()
+
+    // 封装保存播放历史记录逻辑
+    const { savePlay } = usePlayHistory()
 
     // 封装歌词逻辑
     const {
@@ -335,6 +339,8 @@ export default {
       }
       songReady.value = true
       playLyric()
+      // 歌曲准备播放时保存播放历史记录
+      savePlay(currentSong.value)
     }
     // 歌曲加载错误触发事件，将加载状态置为结束
     function error() {

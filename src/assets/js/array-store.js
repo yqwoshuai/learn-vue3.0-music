@@ -3,8 +3,13 @@ import storage from 'good-storage'
 // 顶部插入元素
 function insertArray(arr, val, compare, maxLen) {
   const index = arr.findIndex(compare)
-  if (index > -1) {
+  // 点击的是第一个元素直接返回
+  if (index === 0) {
     return
+  }
+  // 点击的不是第一个元素，则将这元素移动到第一个位置
+  if (index > 0) {
+    arr.splice(index, 1)
   }
   arr.unshift(val)
   // 超过最大值则删除末尾元素

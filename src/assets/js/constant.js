@@ -8,6 +8,8 @@ export const ALBUM_KEY = '__vue3_music_album__'
 export const TOP_KEY = '__vue3_music_top__'
 // 搜索历史记录
 export const SEARCH_KEY = '__vue3_music_search__'
+// 播放历史记录
+export const PLAY_KEY = '__vue3_music_play__'
 
 // 收藏列表最大值
 export const FAVORITE_MAXLEN = 100
