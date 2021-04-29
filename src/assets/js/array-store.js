@@ -26,7 +26,7 @@ function deleteFromArray(arr, compare) {
   }
 }
 
-// 保存到localStorage
+// 保存单个元素到localStorage
 export function save(item, key, compare, maxLen) {
   const items = storage.get(key, [])
   insertArray(items, item, compare, maxLen)
@@ -51,4 +51,9 @@ export function load(key) {
 export function clear(key) {
   storage.remove(key)
   return []
+}
+
+// 保存整个列表到localStorage
+export function saveAll(items, key) {
+  storage.set(key, items)
 }
