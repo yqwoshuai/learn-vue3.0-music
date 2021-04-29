@@ -1,12 +1,17 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Recommend from '@/views/recommend'
-import Singer from '@/views/singer'
-import TopList from '@/views/top-list'
-import Search from '@/views/search'
-import SingerDetail from '@/views/singer-detail'
-import TopDetail from '@/views/top-detail'
-import Album from '@/views/album'
-import UserCenter from '@/views/user-center'
+const Recommend = () =>
+  import('@/views/recommend' /* webpackChunkName: "Recommend" */)
+const Singer = () => import('@/views/singer' /* webpackChunkName: "Singer" */)
+const TopList = () =>
+  import('@/views/top-list' /* webpackChunkName: "TopList" */)
+const Search = () => import('@/views/search' /* webpackChunkName: "Search" */)
+const SingerDetail = () =>
+  import('@/views/singer-detail' /* webpackChunkName: "SingerDetail" */)
+const TopDetail = () =>
+  import('@/views/top-detail' /* webpackChunkName: "TopDetail" */)
+const Album = () => import('@/views/album' /* webpackChunkName: "Album" */)
+const UserCenter = () =>
+  import('@/views/user-center' /* webpackChunkName: "UserCenter" */)
 
 const routes = [
   {

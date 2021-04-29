@@ -1,4 +1,13 @@
-import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import {
+  computed,
+  ref,
+  watch,
+  onMounted,
+  onUnmounted,
+  onActivated,
+  onDeactivated,
+  nextTick
+} from 'vue'
 import { useStore } from 'vuex'
 import BScroll from '@better-scroll/core'
 import Slide from '@better-scroll/slide'
@@ -71,6 +80,15 @@ export default function useCD() {
     if (slider.value) {
       slider.value.destroy()
     }
+  })
+
+  onActivated(() => {
+    scroll.value.enable()
+    scroll.value.refresh()
+  })
+
+  onDeactivated(() => {
+    scroll.value.disable()
   })
 
   return {

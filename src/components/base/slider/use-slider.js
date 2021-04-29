@@ -1,7 +1,7 @@
 import BScroll from '@better-scroll/core'
 import Slide from '@better-scroll/slide'
 
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, onActivated, onDeactivated, ref } from 'vue'
 
 BScroll.use(Slide)
 
@@ -30,6 +30,15 @@ export default function useSlider(wrapperRef) {
   // 组件卸载时销毁轮播实例
   onUnmounted(() => {
     slider.value.destroy()
+  })
+
+  onActivated(() => {
+    slider.value.enable()
+    slider.value.refresh()
+  })
+
+  onDeactivated(() => {
+    slider.value.disable()
   })
 
   return {

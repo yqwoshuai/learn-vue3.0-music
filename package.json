@@ -6,7 +6,8 @@
     "start": "npm run serve",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "npm run build && nohup node backend/prod.server.js &"
   },
   "dependencies": {
     "@better-scroll/core": "^2.2.1",
